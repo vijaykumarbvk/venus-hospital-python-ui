@@ -158,7 +158,7 @@ Two placeholders must be changed:
 #    .github/workflows/infra-eks.yml       → BUCKET_NAME: ...
 
 # 2. ArgoCD repo URL
-sed -i 's|https://github.com/CHANGE-ME/venus-hospital-python.git|<YOUR_REPO_URL>|g' \
+sed -i 's|https://github.com/CHANGE-ME/venus-hospital-python-ui.git|<YOUR_REPO_URL>|g' \
   k8s-argocd/*/*.yaml
 ```
 

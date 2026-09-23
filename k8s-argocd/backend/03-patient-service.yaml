@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/vijaykumarbvk/venus-hospital-python.git
+    repoURL: https://github.com/vijaykumarbvk/venus-hospital-python-ui.git
     path: services/patient_service
     targetRevision: main
   destination:
