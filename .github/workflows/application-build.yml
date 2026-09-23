@@ -1,0 +1,176 @@
+name: CI/CD — Build & Push Venus Images
+
+on:
+  workflow_dispatch:
+
+  # Uncomment once you're happy with manual runs.
+  # push:
+  #   branches: [main]
+  #   paths-ignore:
+  #     - '**/*.md'
+  #     - 'EKS-Terraform/**'
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+
+permissions:
+  contents: write
+  # id-token: write   # <- OIDC: uncomment this line to allow requesting the OIDC JWT.
+                       #    (also uncomment the role-to-assume block below, and
+                       #    comment out the aws-access-key-id/aws-secret-access-key lines)
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Don't let one broken service block the other five.
+      fail-fast: false
+      matrix:
+        include:
+          - name: user-service
+            repo: venus-user-service
+            dockerfile: services/user_service/Dockerfile
+            manifest: services/user_service/deployment.yml
+          - name: doctor-service
+            repo: venus-doctor-service
+            dockerfile: services/doctor_service/Dockerfile
+            manifest: services/doctor_service/deployment.yml
+          - name: patient-service
+            repo: venus-patient-service
+            dockerfile: services/patient_service/Dockerfile
+            manifest: services/patient_service/deployment.yml
+          - name: appointment-service
+            repo: venus-appointment-service
+            dockerfile: services/appointment_service/Dockerfile
+            manifest: services/appointment_service/deployment.yml
+          - name: api-gateway
+            repo: venus-api-gateway
+            dockerfile: services/api_gateway/Dockerfile
+            manifest: services/api_gateway/deployment.yml
+          - name: streamlit-frontend
+            repo: venus-streamlit-frontend
+            dockerfile: streamlit_app/Dockerfile
+            manifest: streamlit_app/deployment.yml
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          # ---------------------------------------------------------
+          # AUTH MODE: ACCESS KEY (active). Repo secrets AWS_ACCESS_KEY_ID
+          # and AWS_SECRET_ACCESS_KEY, set under Settings > Secrets > Actions.
+          # ---------------------------------------------------------
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          # ---------------------------------------------------------
+          # AUTH MODE: OIDC (commented out). To switch:
+          #   1. Comment out the two access-key lines above.
+          #   2. Uncomment the line below.
+          #   3. Uncomment `id-token: write` in the permissions: block up top.
+          #   4. Create the OIDC provider + IAM role (trust policy scoped to
+          #      this repo) and put its ARN in the AWS_OIDC_ROLE_ARN secret.
+          # ---------------------------------------------------------
+          # role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names "${{ matrix.repo }}" >/dev/null 2>&1 || \
+            aws ecr create-repository \
+              --repository-name "${{ matrix.repo }}" \
+              --image-scanning-configuration scanOnPush=true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Build context is the REPO ROOT for every image, because each
+      # Flask service imports the shared `common/` package.
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ matrix.repo }}:${{ github.sha }}
+            ${{ env.ECR_REGISTRY }}/${{ matrix.repo }}:latest
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+
+      - name: Pin image tag in the Kubernetes manifest
+        run: |
+          IMAGE_URI="${{ env.ECR_REGISTRY }}/${{ matrix.repo }}:${{ github.sha }}"
+          # Only rewrite the line for THIS service's image, so a manifest
+          # containing several images stays intact.
+          sed -i "s|image: .*/${{ matrix.repo }}:.*|image: ${IMAGE_URI}|g" "${{ matrix.manifest }}"
+          grep -n "image:" "${{ matrix.manifest }}"
+
+      - name: Upload patched manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: manifest-${{ matrix.name }}
+          path: ${{ matrix.manifest }}
+          retention-days: 1
+
+  # ============================================================
+  # Commit all six patched manifests in ONE commit.
+  # Doing this per-matrix-job causes push races; collecting the
+  # artifacts and committing once avoids that entirely.
+  # ============================================================
+  commit-manifests:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GIT_PAT }}
+
+      - name: Download patched manifests
+        uses: actions/download-artifact@v4
+        with:
+          pattern: manifest-*
+          path: /tmp/manifests
+
+      - name: Apply patched manifests into the tree
+        run: |
+          set -e
+          copy_if_present() {
+            local artifact_dir="$1" dest="$2"
+            local file="/tmp/manifests/${artifact_dir}/$(basename "$dest")"
+            if [ -f "$file" ]; then
+              cp "$file" "$dest"
+              echo "updated $dest"
+            else
+              echo "no artifact for $dest (its build likely failed) — leaving as-is"
+            fi
+          }
+
+          copy_if_present manifest-user-service        services/user_service/deployment.yml
+          copy_if_present manifest-doctor-service      services/doctor_service/deployment.yml
+          copy_if_present manifest-patient-service     services/patient_service/deployment.yml
+          copy_if_present manifest-appointment-service services/appointment_service/deployment.yml
+          copy_if_present manifest-api-gateway         services/api_gateway/deployment.yml
+          copy_if_present manifest-streamlit-frontend  streamlit_app/deployment.yml
+
+      - name: Commit and push
+        run: |
+          git config --global user.name  "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+          git add services/*/deployment.yml streamlit_app/deployment.yml
+          git commit -m "ci: pin image tags to ${GITHUB_SHA::7} [skip ci]" || {
+            echo "No manifest changes to commit."
+            exit 0
+          }
+          git pull --rebase origin main || true
+          git push origin main

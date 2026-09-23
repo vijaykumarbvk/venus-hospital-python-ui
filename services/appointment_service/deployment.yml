@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appointment-service
+  namespace: venus
+  labels:
+    app: appointment-service
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: appointment-service
+  template:
+    metadata:
+      labels:
+        app: appointment-service
+        tier: backend
+    spec:
+      containers:
+        - name: appointment-service
+          image: 633379283316.dkr.ecr.us-east-1.amazonaws.com/venus-appointment-service:221761e4427735253ccea9e43cda69105d74e4a9
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: venus-config
+          env:
+            - name: DB_NAME
+              value: "venus_appointment_db"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 40
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: appointment-service
+  namespace: venus
+  labels:
+    app: appointment-service
+spec:
+  type: ClusterIP
+  selector:
+    app: appointment-service
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8080

@@ -1,0 +1,25 @@
+version: '3.8'
+
+# Just MySQL and Redis now. Kafka + Zookeeper are gone -- the event bus
+# runs on Redis Streams (see common/resilience.py) using this same
+# redis container, no separate broker needed.
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: venus-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+    container_name: venus-redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  mysql_data:

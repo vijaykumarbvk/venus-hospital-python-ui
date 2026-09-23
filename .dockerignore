@@ -1,0 +1,25 @@
+# Build context is the repo root, so keep it small and keep secrets out.
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/*.db
+.git
+.gitignore
+.env
+
+# Never let Terraform state or local tfvars into an image layer —
+# state files contain the RDS password in plaintext.
+EKS-Terraform/.terraform
+EKS-Terraform/*.tfstate*
+EKS-Terraform/*.tfvars
+EKS-Terraform/tfplan
+
+# Docs and manifests aren't needed at runtime.
+*.md
+**/*.md
+k8s-base/
+k8s-argocd/
+efk-stack/
+db/
+.github/
+docker-compose.yml

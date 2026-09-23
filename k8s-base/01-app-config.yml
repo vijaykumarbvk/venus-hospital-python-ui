@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: venus-config
+  namespace: venus
+data:
+  # ---- Database ----
+  # Same pattern as your previous project's backend-cm.yml: plaintext in
+  # the ConfigMap, no separate k8s Secret object. Matches rds.tf, which
+  # hardcodes the same username/password rather than reading a
+  # Terraform secret variable.
+  #
+  # REPLACE DB_HOST after `terraform apply` with:
+  #   terraform -chdir=EKS-Terraform output -raw rds_endpoint
+  DB_HOST: "venus-hospital-mysql.cadsa2seukct.us-east-1.rds.amazonaws.com"
+  DB_USER: "admin"
+  DB_PASSWORD: "Cloud123"
+
+  # ---- Service discovery (replaces Eureka; these are k8s DNS names) ----
+  USER_SERVICE_URL:        "http://user-service:80"
+  DOCTOR_SERVICE_URL:      "http://doctor-service:80"
+  PATIENT_SERVICE_URL:     "http://patient-service:80"
+  APPOINTMENT_SERVICE_URL: "http://appointment-service:80"
+
+  # ---- Redis (ElastiCache) ----
+  # REPLACE with: terraform -chdir=EKS-Terraform output -raw redis_endpoint
+  REDIS_HOST: "venus-hospital-redis.emjqc2.0001.use1.cache.amazonaws.com:6379"
+  REDIS_PORT: "6379"
+  REDIS_DB:   "0"
+  REDIS_URL:  "redis://venus-hospital-redis.emjqc2.0001.use1.cache.amazonaws.com:6379/0"
+
+  # ---- Event bus ----
+  # Was Kafka + Zookeeper (in-cluster StatefulSets). Replaced with Redis
+  # Streams on the SAME Redis instance above -- no separate bootstrap
+  # servers needed, no JVM broker to operate. See common/resilience.py.
+  EVENT_STREAM_MAXLEN: "10000"
+
+  # ---- Gateway ----
+  RATE_LIMIT: "100 per minute"
+
+  # ---- JWT ----
+  # A fixed dev value so the stack boots out of the box, same spirit as
+  # the previous project's plaintext MAIL_PASSWORD. Every service must
+  # read the SAME value or gateway-issued tokens won't validate — that's
+  # the only reason it lives here instead of per-service. Rotate this
+  # (and roll every pod) before this is anything but a demo.
+  JWT_SECRET: "venus-hospital-dev-jwt-secret-CHANGE-ME-b64:pQr7ZmX92kLtFj4Nc8Ws"
+  JWT_EXPIRY_SECONDS:         "86400"
+  JWT_REFRESH_EXPIRY_SECONDS: "604800"

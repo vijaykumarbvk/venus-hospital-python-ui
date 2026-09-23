@@ -1,0 +1,57 @@
+/* Page frame, shell placeholders, grid helpers */
+
+.venus-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.venus-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.venus-page__title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.venus-page__subtitle {
+  font-size: var(--text-base);
+  color: var(--text-muted);
+  margin: var(--space-1) 0 0;
+}
+
+.venus-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+}
+.venus-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+.venus-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.venus-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Ensure main landmark spacing */
+#venus-main.venus-page {
+  min-height: 50vh;
+}

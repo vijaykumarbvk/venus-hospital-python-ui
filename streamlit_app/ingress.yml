@@ -1,0 +1,48 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: venus-ingress
+  namespace: venus
+  annotations:
+    # --- Websocket support: Streamlit will not render without this. ---
+    # Streamlit upgrades to a websocket immediately after page load; the
+    # default 60s proxy read timeout would tear the connection down and
+    # the browser would show "Please wait..." forever.
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+
+    # --- Sticky sessions ---
+    # Streamlit session state lives in the pod's memory. Without affinity
+    # a user's websocket can land on a different replica than their login
+    # did, and they get silently logged out.
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/affinity-mode: "persistent"
+    nginx.ingress.kubernetes.io/session-cookie-name: "venus-affinity"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "86400"
+
+    nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          # Anything under /api goes straight to the gateway, which does
+          # JWT validation, rate limiting, and circuit breaking before
+          # forwarding to the right microservice.
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 80
+
+          # Everything else is the Streamlit UI (including /_stcore/*,
+          # which carries the websocket).
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: streamlit-frontend
+                port:
+                  number: 80

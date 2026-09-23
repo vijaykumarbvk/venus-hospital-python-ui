@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: venus-frontend
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/vijaykumarbvk/venus-hospital-python.git
+    path: streamlit_app
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: venus
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

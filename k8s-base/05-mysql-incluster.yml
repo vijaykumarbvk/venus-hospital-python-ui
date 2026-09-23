@@ -1,0 +1,119 @@
+# ---------------------------------------------------------------------
+# OPTIONAL — in-cluster MySQL instead of RDS.
+#
+# This is the same either/or your e-commerce project had (mysql-deployment.yml
+# + sql-cm.yml, both commented out). Use it when you want to demo the whole
+# stack without paying for RDS, or when running on kind/minikube.
+#
+# NOT applied by default. To switch:
+#
+#   1. kubectl apply -f k8s-base/05-mysql-incluster.yml
+#   2. Point the Secret at the in-cluster service instead of RDS:
+#        kubectl create secret generic venus-secret -n venus \
+#          --from-literal=DB_HOST='mysql' \
+#          --from-literal=DB_USER='root' \
+#          --from-literal=DB_PASSWORD='root' \
+#          --from-literal=JWT_SECRET="$(openssl rand -base64 48)" \
+#          --dry-run=client -o yaml | kubectl apply -f -
+#   3. kubectl rollout restart deploy -n venus
+#
+# Trade-off worth knowing: this is a single replica on one EBS volume with
+# no automated backup. If the pod's node dies you lose the data. That is
+# fine for a demo and wrong for anything else -- which is exactly why the
+# default path in the README uses RDS.
+# ---------------------------------------------------------------------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-script
+  namespace: venus
+data:
+  # Runs once, on first boot, from /docker-entrypoint-initdb.d.
+  # Creates the same four schemas as db/init.sql; the services still
+  # build their own tables via SQLAlchemy create_all().
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS venus_user_db
+      CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    CREATE DATABASE IF NOT EXISTS venus_doctor_db
+      CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    CREATE DATABASE IF NOT EXISTS venus_patient_db
+      CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    CREATE DATABASE IF NOT EXISTS venus_appointment_db
+      CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: venus
+  labels:
+    app: mysql
+spec:
+  type: ClusterIP
+  selector:
+    app: mysql
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  namespace: venus
+spec:
+  serviceName: mysql
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+              name: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "root"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "mysqladmin ping -h 127.0.0.1 -uroot -proot"]
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", "mysqladmin ping -h 127.0.0.1 -uroot -proot"]
+            initialDelaySeconds: 60
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+      volumes:
+        - name: initdb
+          configMap:
+            name: mysql-init-script
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: ebs-storage
+        resources:
+          requests:
+            storage: 10Gi

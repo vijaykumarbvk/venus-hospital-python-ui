@@ -1,0 +1,368 @@
+/* Component styles — expanded in later phases.
+   Only stable class names (venus-*) live here. */
+
+.venus-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--card-padding);
+  box-shadow: var(--shadow-1);
+}
+
+.venus-kpi {
+  background: var(--kpi-bg);
+  border: 1px solid var(--kpi-border);
+  border-radius: var(--radius-md);
+  padding: var(--card-padding);
+  box-shadow: var(--shadow-1);
+}
+.venus-kpi__label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
+}
+.venus-kpi__value {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.venus-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  border: 1px solid transparent;
+  line-height: 1.4;
+}
+.venus-badge--success {
+  color: var(--status-success-fg);
+  background: var(--status-success-bg);
+  border-color: var(--status-success-border);
+}
+.venus-badge--warning {
+  color: var(--status-warning-fg);
+  background: var(--status-warning-bg);
+  border-color: var(--status-warning-border);
+}
+.venus-badge--critical {
+  color: var(--status-critical-fg);
+  background: var(--status-critical-bg);
+  border-color: var(--status-critical-border);
+}
+.venus-badge--info {
+  color: var(--status-info-fg);
+  background: var(--status-info-bg);
+  border-color: var(--status-info-border);
+}
+.venus-badge--neutral {
+  color: var(--status-neutral-fg);
+  background: var(--status-neutral-bg);
+  border-color: var(--status-neutral-border);
+}
+
+.venus-empty {
+  text-align: center;
+  padding: var(--space-10) var(--space-6);
+  color: var(--text-muted);
+}
+.venus-empty__title {
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.venus-error {
+  border: 1px solid var(--status-critical-border);
+  background: var(--status-critical-bg);
+  color: var(--status-critical-fg);
+  border-radius: var(--radius-md);
+  padding: var(--card-padding);
+}
+
+/* Skeleton shimmer */
+.venus-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 0%,
+    var(--surface-3) 50%,
+    var(--surface-2) 100%
+  );
+  background-size: 200% 100%;
+  animation: venus-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+@keyframes venus-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .venus-skeleton { animation: none; background: var(--surface-2); }
+}
+
+/* ---- Shell: brand, role chip, user card ---- */
+.venus-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0 var(--space-4);
+}
+.venus-sidebar-brand__mark {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--navy-900);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--weight-bold);
+  font-size: var(--text-md);
+  flex-shrink: 0;
+}
+[data-theme="dark"] .venus-sidebar-brand__mark {
+  background: var(--blue-600);
+}
+.venus-sidebar-brand__name {
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-md);
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.venus-sidebar-brand__tag {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.venus-role-chip {
+  display: inline-flex;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--accent);
+  background: var(--accent-muted);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  margin-bottom: var(--space-4);
+}
+
+.venus-nav-section-label {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+.venus-user-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  margin-bottom: var(--space-3);
+}
+.venus-user-card__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--navy-800);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  flex-shrink: 0;
+}
+.venus-user-card__name {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.venus-user-card__role {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.venus-header {
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.venus-header__greeting {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+.venus-header__date {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: var(--space-1) 0 0;
+}
+.venus-breadcrumbs {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+}
+
+.venus-kpi__hint {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-top: var(--space-1);
+}
+
+.venus-empty__icon {
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+  opacity: 0.7;
+}
+
+/* ---- Auth landing (Phase 4) ---- */
+.venus-auth {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-8);
+  align-items: stretch;
+  min-height: 70vh;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+@media (max-width: 900px) {
+  .venus-auth { grid-template-columns: 1fr; min-height: auto; }
+}
+
+.venus-auth-brand {
+  background: linear-gradient(160deg, var(--navy-900) 0%, var(--navy-800) 55%, #163A5F 100%);
+  border-radius: var(--radius-lg);
+  padding: var(--space-10) var(--space-8);
+  color: #E8EEF5;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.venus-auth-brand::after {
+  content: "";
+  position: absolute;
+  width: 280px; height: 280px;
+  right: -60px; bottom: -60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(22,119,255,0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+.venus-auth-brand__mark {
+  width: 48px; height: 48px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.12);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 20px;
+  margin-bottom: var(--space-6);
+}
+.venus-auth-brand__title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  line-height: 1.2;
+  margin: 0 0 var(--space-3);
+}
+.venus-auth-brand__lead {
+  font-size: var(--text-md);
+  opacity: 0.85;
+  margin: 0 0 var(--space-8);
+  max-width: 32ch;
+}
+.venus-auth-brand__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.venus-auth-brand__list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-base);
+  opacity: 0.92;
+}
+.venus-auth-brand__list li span {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  border-radius: var(--radius-full);
+  background: rgba(45, 212, 191, 0.2);
+  color: #2DD4BF;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.venus-auth-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-2);
+}
+.venus-auth-card__title {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-1);
+}
+.venus-auth-card__sub {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: 0 0 var(--space-6);
+}
+
+.venus-stepper {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+}
+.venus-stepper__step {
+  flex: 1;
+  min-width: 70px;
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid var(--border-subtle);
+}
+.venus-stepper__step.is-active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: var(--weight-medium);
+}
+.venus-stepper__step.is-done {
+  color: var(--status-success-fg);
+  border-bottom-color: var(--status-success-fg);
+}
+
+.venus-auth-footer {
+  margin-top: var(--space-6);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.venus-partial {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--status-warning-border);
+  background: var(--status-warning-bg);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin: var(--space-3) 0;
+}

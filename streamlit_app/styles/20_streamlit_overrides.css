@@ -1,0 +1,122 @@
+/* ================================================================
+   ALL brittle Streamlit selectors live HERE only.
+   Comment every rule with the element it targets.
+   Prefer stable hooks (our own classes) everywhere else.
+   ================================================================ */
+
+/* Main block container background */
+section.main > div {
+  background: var(--surface-0);
+}
+
+/* Hide default Streamlit chrome when V2 shell is active
+   (applied only when body has .venus-v2) */
+.venus-v2 header[data-testid="stHeader"] {
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.venus-v2 [data-testid="stToolbar"] {
+  visibility: hidden;
+  height: 0;
+}
+
+/* Sidebar width alignment with our tokens */
+.venus-v2 section[data-testid="stSidebar"] {
+  background: var(--surface-1);
+  border-right: 1px solid var(--border-subtle);
+  min-width: var(--sidebar-width);
+}
+
+.venus-v2 section[data-testid="stSidebar"] > div {
+  padding-top: var(--space-4);
+}
+
+/* Primary buttons → accent */
+.venus-v2 div[data-testid="stButton"] > button[kind="primary"] {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-inverse);
+  border-radius: var(--radius-sm);
+  font-weight: var(--weight-medium);
+  min-height: var(--control-height);
+  transition: background-color var(--duration-micro) var(--ease-out);
+}
+.venus-v2 div[data-testid="stButton"] > button[kind="primary"]:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* Secondary / default buttons */
+.venus-v2 div[data-testid="stButton"] > button {
+  border-radius: var(--radius-sm);
+  min-height: var(--control-height);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+  background: var(--surface-1);
+}
+
+/* Inputs */
+.venus-v2 div[data-testid="stTextInput"] input,
+.venus-v2 div[data-testid="stNumberInput"] input,
+.venus-v2 div[data-testid="stSelectbox"] > div,
+.venus-v2 div[data-testid="stTextArea"] textarea {
+  border-radius: var(--radius-sm);
+  border-color: var(--border-strong);
+  min-height: var(--control-height);
+  background: var(--surface-1);
+  color: var(--text-primary);
+}
+
+/* Metrics */
+.venus-v2 div[data-testid="stMetric"] {
+  background: var(--kpi-bg);
+  border: 1px solid var(--kpi-border);
+  border-radius: var(--radius-md);
+  padding: var(--card-padding);
+  box-shadow: var(--shadow-1);
+}
+.venus-v2 div[data-testid="stMetric"] label {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+.venus-v2 div[data-testid="stMetric"] [data-testid="stMetricValue"] {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-semibold);
+}
+
+/* Dataframes */
+.venus-v2 div[data-testid="stDataFrame"] {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+}
+
+/* Expanders / containers with border */
+.venus-v2 div[data-testid="stVerticalBlockBorderWrapper"] {
+  border-radius: var(--radius-md);
+  border-color: var(--border-subtle);
+  background: var(--surface-1);
+}
+
+/* Tabs */
+.venus-v2 button[data-baseweb="tab"] {
+  color: var(--text-muted);
+  font-weight: var(--weight-medium);
+}
+.venus-v2 button[data-baseweb="tab"][aria-selected="true"] {
+  color: var(--accent);
+}
+
+/* Alerts */
+.venus-v2 div[data-testid="stAlert"] {
+  border-radius: var(--radius-md);
+}
+
+/* Reduce default top padding on main */
+.venus-v2 .block-container {
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-10);
+  max-width: 1200px;
+}

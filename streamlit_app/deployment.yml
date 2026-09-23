@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: streamlit-frontend
+  namespace: venus
+  labels:
+    app: streamlit-frontend
+    tier: frontend
+spec:
+  # Streamlit keeps per-user state in a server-side session tied to a
+  # websocket. Multiple replicas only behave if the ingress pins each
+  # browser to one pod — see the affinity annotations in ingress.yml.
+  replicas: 2
+  selector:
+    matchLabels:
+      app: streamlit-frontend
+  template:
+    metadata:
+      labels:
+        app: streamlit-frontend
+        tier: frontend
+    spec:
+      containers:
+        - name: streamlit-frontend
+          image: 633379283316.dkr.ecr.us-east-1.amazonaws.com/venus-streamlit-frontend:221761e4427735253ccea9e43cda69105d74e4a9
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8501
+              name: http
+          env:
+            # In-cluster call to the gateway; never leaves the VPC.
+            - name: API_BASE_URL
+              value: "http://api-gateway:80"
+          readinessProbe:
+            httpGet:
+              path: /_stcore/health
+              port: 8501
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /_stcore/health
+              port: 8501
+            initialDelaySeconds: 40
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 200m
+              memory: 384Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: streamlit-frontend
+  namespace: venus
+  labels:
+    app: streamlit-frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: streamlit-frontend
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8501

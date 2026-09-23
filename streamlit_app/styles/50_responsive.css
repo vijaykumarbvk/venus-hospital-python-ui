@@ -1,0 +1,119 @@
+/* ================================================================
+   Responsive — breakpoints: 360, 390, 768, 1024, 1280, 1440, 1920
+   Goals: no horizontal scroll, ≥44px touch targets, table→cards
+   ================================================================ */
+
+/* Fluid main padding */
+.venus-v2 .block-container {
+  padding-left: max(var(--space-4), env(safe-area-inset-left));
+  padding-right: max(var(--space-4), env(safe-area-inset-right));
+  max-width: 1200px;
+}
+
+/* ---- ≥1280 (desktop default) — already in tokens/layouts ---- */
+
+/* ---- ≤1023 tablet ---- */
+@media (max-width: 1023px) {
+  .venus-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .venus-auth {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .venus-auth-brand {
+    padding: var(--space-6) var(--space-5);
+  }
+}
+
+/* ---- ≤767 mobile ---- */
+@media (max-width: 767px) {
+  .venus-grid-4,
+  .venus-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .venus-page__title {
+    font-size: var(--text-xl);
+  }
+
+  .venus-header__greeting {
+    font-size: var(--text-md);
+  }
+
+  .venus-auth-card {
+    padding: var(--space-5);
+  }
+
+  .venus-stepper__step {
+    min-width: 56px;
+    font-size: 11px;
+  }
+
+  /* Stack KPI cards full width */
+  .venus-v2 div[data-testid="stHorizontalBlock"] {
+    flex-wrap: wrap;
+  }
+
+  /* Reduce main top padding on small screens */
+  .venus-v2 .block-container {
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-8);
+  }
+
+  /* Prevent long unbroken strings from forcing horizontal scroll */
+  .venus-v2,
+  .venus-v2 * {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* ---- ≤390 narrow phones ---- */
+@media (max-width: 390px) {
+  .venus-sidebar-brand__name {
+    font-size: var(--text-base);
+  }
+  .venus-preloader__stage {
+    transform: scale(0.9);
+  }
+}
+
+/* Touch targets ≥ 44px on coarse pointers */
+@media (pointer: coarse) {
+  .venus-v2 div[data-testid="stButton"] > button,
+  .venus-v2 div[data-testid="stDownloadButton"] > button,
+  .venus-preloader__skip {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .venus-v2 div[data-testid="stTextInput"] input,
+  .venus-v2 div[data-testid="stNumberInput"] input,
+  .venus-v2 div[data-testid="stSelectbox"] > div {
+    min-height: 44px;
+  }
+}
+
+/* High contrast preference */
+@media (prefers-contrast: more) {
+  :root {
+    --border-subtle: #64748B;
+    --border-strong: #334155;
+    --text-muted: #475569;
+  }
+  [data-theme="dark"] {
+    --border-subtle: rgba(255, 255, 255, 0.35);
+    --border-strong: rgba(255, 255, 255, 0.55);
+    --text-muted: #CBD5E1;
+  }
+  .venus-badge {
+    border-width: 2px;
+  }
+}
+
+/* Ensure focus is never removed for keyboard users */
+@media (prefers-reduced-motion: no-preference) {
+  .venus-v2 :focus-visible {
+    transition: box-shadow var(--duration-micro) var(--ease-out);
+  }
+}

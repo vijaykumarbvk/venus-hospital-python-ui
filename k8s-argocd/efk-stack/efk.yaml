@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: venus-efk-stack
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/vijaykumarbvk/venus-hospital-python.git
+    path: efk-stack
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-logging
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
