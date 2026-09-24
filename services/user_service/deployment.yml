@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: 633379283316.dkr.ecr.us-east-1.amazonaws.com/venus-user-service:221761e4427735253ccea9e43cda69105d74e4a9
+          image: 292681319373.dkr.ecr.us-east-1.amazonaws.com/venus-user-service:ba579c30323c2cc88c7d71f90d4694b77a324b87
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
