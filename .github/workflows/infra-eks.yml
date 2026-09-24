@@ -16,7 +16,7 @@ env:
   AWS_REGION: us-east-1
   TF_VERSION: "1.10.5"
   TF_WORKING_DIR: EKS-Terraform
-  BUCKET_NAME: venus-hospital-tfstate-vkb   # must match backend.tf
+  BUCKET_NAME: venus-hospital-tfstate-vj   # must match backend.tf
 
 # ---------------------------------------------------------------------
 # AUTH MODE: ACCESS KEY (active) — AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY
