@@ -12,7 +12,7 @@ data:
   #
   # REPLACE DB_HOST after `terraform apply` with:
   #   terraform -chdir=EKS-Terraform output -raw rds_endpoint
-  DB_HOST: "venus-hospital-mysql.cadsa2seukct.us-east-1.rds.amazonaws.com"
+  DB_HOST: "venus-hospital-mysql.c6ba8a2iugt8.us-east-1.rds.amazonaws.com"
   DB_USER: "admin"
   DB_PASSWORD: "Cloud123"
 
@@ -24,10 +24,10 @@ data:
 
   # ---- Redis (ElastiCache) ----
   # REPLACE with: terraform -chdir=EKS-Terraform output -raw redis_endpoint
-  REDIS_HOST: "venus-hospital-redis.emjqc2.0001.use1.cache.amazonaws.com:6379"
+  REDIS_HOST: "venus-hospital-redis.r3ggtx.0001.use1.cache.amazonaws.com:6379"
   REDIS_PORT: "6379"
   REDIS_DB:   "0"
-  REDIS_URL:  "redis://venus-hospital-redis.emjqc2.0001.use1.cache.amazonaws.com:6379/0"
+  REDIS_URL:  "redis://venus-hospital-redis.r3ggtx.0001.use1.cache.amazonaws.com:6379/0"
 
   # ---- Event bus ----
   # Was Kafka + Zookeeper (in-cluster StatefulSets). Replaced with Redis
